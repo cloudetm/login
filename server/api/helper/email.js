@@ -1,10 +1,13 @@
 var nodemailer    = require("nodemailer");
+var common = require('./common');
+var config = common.config;
+
 
 var smtpTransport = nodemailer.createTransport({
 	    service: "Gmail",
 	    auth: {
-	        user: "test10891089@gmail.com",
-	        pass: "testing@gmail"
+	        user: config.email.user,
+	        pass: config.email.pass
 	    }
 	});
 

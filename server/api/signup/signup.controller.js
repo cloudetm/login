@@ -29,22 +29,8 @@ var dispatchEmail = function(userDetail) {
 // Get list of things
 exports.index = function(req, res) {
     res.render('signup');
-//    Thing.find(function (err, things) {
-//        if(err) { return handleError(res, err); }
-//        return res.json(200, things);
-//    });
 };
 
-//// Get a single thing
-//exports.show = function(req, res) {
-//    Thing.findById(req.params.id, function (err, thing) {
-//        if(err) { return handleError(res, err); }
-//        if(!thing) { return res.send(404); }
-//        return res.json(thing);
-//    });
-//};
-//
-// Creates a new thing in the DB.
 exports.create = function(req, res) {
 	var body = req.body;
 	var email = body.email;
@@ -61,7 +47,7 @@ exports.create = function(req, res) {
 			       if(err) { return handleError(res, err); }
 			       console.log(userDetail);
 			       dispatchEmail(userDetail);
-			       // res.send(200, {status: 'OK'});
+			       res.send(200, {status: 'OK'});
 			   });
 			}
 		});
@@ -75,15 +61,20 @@ exports.validateEmail = function(req, res){
 	var url_parts = url.parse(req.url, true);
 	var query = url_parts.query;
 	var emailHash = query.h;
+	console.log(emailHash);
 	if (emailHash) {
-		Users.find({'emailHash': emailHash}, function(err, doc){
+		Users.findOne({'emailHash': emailHash}, function(err, doc){
+			console.log(doc);
 			if (doc && doc.emailHash) {
 				console.log(doc);
-				res.render('validEmail', {name : doc.name});
+				res.render('validEmail', {name : doc.name, layout: false});
+			} 
+			else {
+				res.render("timeoutHash", {layout: false});
 			}
 		}); 
 	} else {
-		res.render("404");
+		handleError(res, err);
 	}
 
 };
