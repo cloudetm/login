@@ -1,0 +1,18 @@
+<section id="reset-container">
+	<h3> Fill the details for your password</h3>
+	<form role="form" action="/signup/reset?h={{emailHash}}" method="post">
+		<div class="form-group">
+			<label for="oldpassword" >Old Password</label>
+			<input type="password" class="form-control" id="oldpassword" name="oldpassword" placeholder="Password">
+		</div>
+		<div class="form-group">
+			<label for="newpassword1" >New Password</label>
+			<input type="password" class="form-control" id="newpassword1" name="newpassword1" placeholder="Password">
+		</div>
+		<div class="form-group">
+			<label for="newpassword2" >New Password</label>
+			<input type="password" class="form-control" id="newpassword2" name="newpassword2" placeholder="Password">
+		</div>
+		<button type="submit" class="btn btn-default">Submit</button>
+	</form>
+</section>

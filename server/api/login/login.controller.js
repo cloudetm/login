@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
-var Users = require('../signup/signup.model');
+var Users = require('../signup/signup.model').users;
 //var signup = require('./signup.model');
 
 // Get list of things
@@ -15,13 +15,17 @@ exports.validate = function(req, res) {
     console.log(data,req.cookies.cokkieName,req.session);
     var cookie = req.cookies.cokkieName;
 	var queryObj = {'email': data.email, 'password': data.password};
+    var rememberMe = data.rememberMe || false;
     Users.findOne(queryObj, function (err, doc) {
    		console.log(err, doc);
         if (doc == undefined){
-            return res.json(200, {success : false, error: 'NOT_MATCH', msg: "credentails don't match"}); 
+            return res.json(200, {success : false, error: 'NOT_MATCH', msg: "Wrong combination of email and password"}); 
         }else{                
             console.log('user authenticated ');
             req.session.userid = doc._id;
+            if (rememberMe) {
+                req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+            }
             req.session.cookie.expires = false;
             return res.json(200, {success: true});
         }

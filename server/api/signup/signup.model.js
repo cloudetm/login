@@ -11,4 +11,17 @@ var userSignupSchema = new Schema({
     emailHash: String
 });
 
-module.exports = mongoose.model('users', userSignupSchema);
+var resetPasswordSchema = new Schema({
+	id: Number,
+	email: String,
+	emailHash: String,
+	resetRequestTime: Number,
+	timeout: Number
+
+});
+
+module.exports = {
+
+	users: mongoose.model('users', userSignupSchema),
+	resetLinks: mongoose.model('resetPassword', resetPasswordSchema)	
+};
