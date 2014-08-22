@@ -21,8 +21,9 @@ module.exports = function(app) {
     
     app.route('/*')
     .get(function(req, res) {
-      res.render('index', {
-        title:'welcome'
+      res.render('404', {
+        title:'welcome',
+        layout: false
       });
     });
 };

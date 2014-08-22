@@ -5,7 +5,7 @@ exports.index = function(req, res) {
     console.log("/home -> index");
     console.log(req.session);
     if (req.session.userid) {
-        res.render('index', {layout: 'layouts2'});  
+        res.render('index', {layout: 'loggedin'});  
     } else {
         res.redirect('/login');
     }

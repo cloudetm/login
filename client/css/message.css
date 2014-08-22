@@ -1,0 +1,22 @@
+body {
+	margin: 0;
+	background-image: url('http://33.media.tumblr.com/6ddffd6a6036f61a1f2b1744bad77730/tumblr_mzgz9vJ1CK1st5lhmo1_1280.jpg');
+	background-size: cover;
+	background-position: 0 20%;
+}
+
+#container {
+	width: 600px;
+	margin: 0 auto;
+	margin-top: 120px;
+}
+
+h1, h2,h3,h4,h5,h6 {
+	margin-bottom: 40px;
+}
+
+.error {
+	color: red;
+}
+
+

@@ -57,6 +57,10 @@ var dispatchEmailForForgotPassword = function(emailDetail, callback) {
 
 // Get list of things
 exports.index = function(req, res) {
+	if (req.session.userid) {
+        res.redirect('/home'); 
+        return;
+    } 
     res.render('signup');
 };
 
@@ -72,6 +76,7 @@ exports.create = function(req, res) {
 			} else {
 				var userDetails = req.body;
 				userDetails.emailHash = encryptor.encrypt(email);
+				userDetails.isValidated = false;
 				Users.create(userDetails, function(err, userDetail) {
 			       if(err) { return handleError(res, err); }
 			       console.log(userDetail);
@@ -80,10 +85,10 @@ exports.create = function(req, res) {
 					    	console.log(error)
 					    }
 					    else {
-			       			res.send(200, {status: 'OK'});
-					    	console.log("mail send", response);
+					    	console.log("mail send after user entered signup details", response);
 				    	}
 			   		});
+			      res.send(200, {status: 'OK'});
 				});
 			}
 		});
@@ -97,12 +102,12 @@ exports.validateEmail = function(req, res){
 	var url_parts = url.parse(req.url, true);
 	var query = url_parts.query;
 	var emailHash = query.h;
-	console.log(emailHash);
+	console.log("email hash after clicking validation email " ,emailHash);
 	if (emailHash) {
-		Users.findOne({'emailHash': emailHash}, function(err, doc){
-			console.log(doc);
+		Users.findOneAndUpdate({'emailHash': emailHash},{isValidated: true} ,function(err, doc){
+			console.log("Validated emial id after clicking link send in email after signing up",doc);
 			if (doc && doc.emailHash) {
-				console.log(doc);
+				console.log("updated doc", doc);
 				res.render('validEmail', {name : doc.name, layout: false});
 			} 
 			else {
@@ -139,10 +144,10 @@ exports.forgotSendMail = function(req, res) {
 		    	console.log(error)
 		    }
 		    else {
-       			res.render('resetRequestReply', {email: email, layout:'message'});
 		    	console.log("forgot password reset mail send", response);
 	    	}
    		});
+       return res.json(200, { success : true});
 	});
 }
 
@@ -158,11 +163,11 @@ exports.reset = function(req, res){
 				var currentTime = Date.now();
 				var timeElapsed = currentTime - doc.resetRequestTime;
 				if (timeElapsed < doc.timeout) {
-					res.render("resetform", {emailHash: emailHash, layout: "message"});
+					res.render("resetform", {emailHash: emailHash, layout: "layouts2"});
 					return;
 				}
 			} 
-			res.render("forgottimeout", {layout: "message"});
+			res.render("forgottimeout", {layout: "layouts2"});
 		}); 
 	} else {
 		handleError(500, "emailHash not found in reset request in signupController");
@@ -180,6 +185,14 @@ exports.updatePassword = function(req, res){
 	var newpassword1 = body.newpassword1.trim();
 	var newpassword2 = body.newpassword2.trim();
 
+	if (newpassword1 !== newpassword1) {
+		return res.json(200, {
+					success : false,
+					error: 'NOT_MATCH',
+					msg: 'New passwords do not match'
+				});
+	}
+
 	console.log(emailHash, body);
 
 	if (emailHash) {
@@ -190,23 +203,40 @@ exports.updatePassword = function(req, res){
 				var timeElapsed = currentTime - doc.resetRequestTime;
 				console.log(timeElapsed, doc.timeout);
 				if (timeElapsed < doc.timeout) {
-					Users.update({'email': doc.email, 'password': newpassword1}, function(err, numberAffected, rawResponse){
+					Users.update({'email': doc.email, 'password': oldpassword},{'password': newpassword1}, function(err, numberAffected, rawResponse){
 						if (err) {
 							handleError(500, err);
 						}
 						if (numberAffected > 0) {
-							res.render('passwordUpdated', {layout:'message'});
+							return res.json(200, {
+								success : true
+							});
+						} 
+						else 
+						{
+							return res.json(200, {
+								success : false,
+								error: 'NOT_MATCH',
+								msg: 'old password is not correct'
+							});
 						}
 						return;
 					}); 
 				} 
 				else {
-					res.render("forgottimeout", {layout: "message"});
+					return res.json(200, {
+						success : false,
+						error: 'INVALID',
+						msg: '<h5>This link is expired or invalid</h5><h6>Link for password reset remains valid upto 3 hour. click <a href="http://localhost:9000/forgot">send an email for password reset</a> to get mail for password reset.</h6>'
+					});
 				}
 			}
 			else {
-				res.render("forgottimeout", {layout: "message"});
-
+				return res.json(200, {
+						success : false,
+						error: 'INVALID',
+						msg: '<h5>This link is expired or invalid</h5><h6>Link for password reset remains valid upto 3 hour. click <a href="http://localhost:9000/forgot">send an email for password reset</a> to get mail for password reset.</h6>'
+					});
 			} 
 		}); 
 	} else {
@@ -214,8 +244,16 @@ exports.updatePassword = function(req, res){
 	}
 };
 
+exports.requestReply = function(req, res){
+	res.render('resetRequestReply', {layout:'layouts2'});
+};
+
+exports.passwordUpdated = function(req, res) {
+	res.render('passwordUpdated',{layout: 'layouts2'})
+};
+
 exports.forgot = function(req,res) {
-    res.render('forgot', {layout:false});
+    res.render('forgot', {layout: 'layouts2'});
 };
 
 function handleError(res, err) {

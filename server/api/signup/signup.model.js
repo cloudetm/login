@@ -8,7 +8,8 @@ var userSignupSchema = new Schema({
     name: String,
     email: String,
     password: String,
-    emailHash: String
+    emailHash: String,
+    isValidated: Boolean
 });
 
 var resetPasswordSchema = new Schema({
